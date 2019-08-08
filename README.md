@@ -28,9 +28,9 @@
  From development repository (dev version):
 
  ```bash
-  $ git clone https://github.com/ArcticFaded/Quantea.git
-  $ cd quantea
-  $ python3 setup.py install
+  git clone https://github.com/ArcticFaded/Quantea.git
+  cd quantea
+  python3 setup.py install
  ```
  ## Setting Up Quantea
  Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
