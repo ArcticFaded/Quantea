@@ -1,8 +1,8 @@
-from db.models import Stock
+from quantea.db.models import Stock
 from pymongo.errors import BulkWriteError
-import pymongo
 from collections import namedtuple
 from functools import partial
+import pymongo
 import json
 
 def json_object_hook(data):
@@ -23,7 +23,9 @@ def should_call_api(tickers, start_date, end_date):
             query_set = Stock.objects.raw({'ticker': ticker, 'date': {"$gte": start_date, "$lte": end_date}})
             results = list(query_set.aggregate({'$sort': {'date': pymongo.DESCENDING}}))
 
-            if (len(results) == 0): # stock does not exist
+            if len(results) == 0: # stock does not exist
+                return True
+            if len(trading_days) == 0: # SPY does not exist
                 return True
 
             if results[0]['date'] < trading_days[0]['date']:

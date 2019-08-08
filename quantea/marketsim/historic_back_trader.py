@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from .portvals import compute_portvals
 from .market_validator import sim_market, sim_market_results
-from technical_indicators.standard_indicators import BaseTechnicalIndicator
+from quantea.technical_indicators.standard_indicators import BaseTechnicalIndicator
 import datetime
 
 class HistoricBackTrader:

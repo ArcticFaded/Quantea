@@ -1,8 +1,8 @@
 from datetime import datetime
 from iexfinance.stocks import get_historical_data
-from db.controllers.store_stocks import store_stock_data, store_stocks_data, should_call_api
-from db.controllers.get_stocks import get_stock_date_for_period
-from db.models import Stock
+from quantea.db.controllers.store_stocks import store_stock_data, store_stocks_data, should_call_api
+from quantea.db.controllers.get_stocks import get_stock_date_for_period
+from quantea.db.models import Stock
 from typing import List, Dict
 import pandas as pd
 

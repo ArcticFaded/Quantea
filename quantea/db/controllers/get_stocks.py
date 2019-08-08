@@ -1,4 +1,4 @@
-from db.models import Stock
+from quantea.db.models import Stock
 import pymongo
 import pandas as pd
 import time
