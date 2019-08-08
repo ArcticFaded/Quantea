@@ -10,8 +10,8 @@
  ## Table of Contents
 
 
- * [Installing](#install)	
- * [Setting Up Quantea](#setting-up-quantea)
+* [Installing](#install)	
+* [Setting Up Quantea](#setting-up-quantea)
   * [Dependencies](#dependencies)
 * [Writing and Running Tests](#writing-and-running-tests)
 * [Environment Variables](#environment-variables)
