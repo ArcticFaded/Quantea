@@ -24,6 +24,7 @@ def compute_portvals(market, orders, commission=0.00, impact=0.000, start_val=10
                           columns=symbols.tolist() + ['CASH'])
     
     order_on_days = market.loc[orders.index.unique()]
+    market.loc[:,'CASH'] = np.ones(len(market))
 
     # this function can be vectorized, LOOKING into it
     for index, row in order_on_days.iterrows():
@@ -35,16 +36,21 @@ def compute_portvals(market, orders, commission=0.00, impact=0.000, start_val=10
                 trades.loc[index, stock] +=  diff[stock]
                 impact_on_trade = (1 + impact) if diff[stock] > 0 else (1 - impact)
                 current_cash = trades.loc[index, 'CASH']
-                trades.loc[index, 'CASH'] = current_cash + (row[(stock, 'close')] * -diff[stock] * impact_on_trade) - (commission)
-    
+                if len(symbols) == 1:
+                    trades.loc[index, 'CASH'] = current_cash + (row['close'] * -diff[stock] * impact_on_trade) - (commission)
+                else:
+                    trades.loc[index, 'CASH'] = current_cash + (row[(stock, 'close')] * -diff[stock] * impact_on_trade) - (commission)
     holdings = trades.cumsum()
     holdings.loc[:, 'CASH'] += start_val
-    
-    closing = market[ [(x, 'close')  for x in market.columns.levels[0] ] ].stack()
-    closing.index = closing.index.droplevel(1)
-    
-    value =  holdings * closing[ [x for x in holdings.columns[:-1]] ]
-    
-    value['CASH'] = holdings['CASH']
+    if len(symbols) == 1:
+        market = market.drop(columns=['volume'])
+        market = market.rename(columns={'close': symbols[0]})
+
+
+        value =  holdings * market
+    else:
+        closing = market[ [(x, 'close')  for x in market.columns.levels[0] ] ].stack()
+        closing.index = closing.index.droplevel(1)
+        value =  holdings * closing[ [x for x in holdings.columns[:-1]] ]
     
     return value.sum(axis=1)
