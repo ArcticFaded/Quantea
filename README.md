@@ -22,7 +22,8 @@
  From PyPI with pip (latest stable release):
 
  ```python
- pip3 install quantea
+ pip3 install quantea (NOT CURRENTLY AVAILABLE)
+ pip3 install --index-url https://test.pypi.org/simple --no-dep quantea --upgrade (ONLY TEST AVAILABLE)
  ```
 
  From development repository (dev version):
