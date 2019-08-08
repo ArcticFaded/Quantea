@@ -7,7 +7,7 @@
  Information of how to install this app and run it locally can be found below, with information of how to contribute coming soon!
 
 
- ## Table of Contents	## Table of Contents
+ ## Table of Contents
 
 
  * [Installing](#install)	
