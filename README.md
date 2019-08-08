@@ -29,7 +29,7 @@
 
  ```bash
  git clone https://github.com/ArcticFaded/Quantea.git
- cd quantea
+ cd src
  python3 setup.py install
  ```
  ## Setting Up Quantea
