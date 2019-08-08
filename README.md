@@ -19,7 +19,17 @@
   
   
  ## Install
- pip install quantea
+ From PyPI with pip (latest stable release):
+
+ ``$ pip3 install quantea``
+
+ From development repository (dev version):
+
+ .. code:: bash
+
+      $ git clone https://github.com/ArcticFaded/Quantea.git
+      $ cd quantea
+      $ python3 setup.py install
   
  ## Setting Up Quantea
  Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
