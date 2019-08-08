@@ -28,9 +28,9 @@
  From development repository (dev version):
 
  ```bash
-  git clone https://github.com/ArcticFaded/Quantea.git
-  cd quantea
-  python3 setup.py install
+ git clone https://github.com/ArcticFaded/Quantea.git
+ cd quantea
+ python3 setup.py install
  ```
  ## Setting Up Quantea
  Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
@@ -40,7 +40,7 @@
   #### MongoDB
   
  EXAMPLE USAGE:
-```
+```python
 from quantea.marketsim.historic_back_trader import HistoricBackTrader
 from quantea.technical_indicators.standard_indicators import BollingerBand, EMA, MACD
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
