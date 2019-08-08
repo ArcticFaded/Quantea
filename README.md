@@ -18,11 +18,11 @@
   * [Configuring Packager IP Address](#configuring-packager-ip-address)
   
   
-  ## Install
-  pip install quantea
+ ## Install
+ pip install quantea
   
-  ## Setting Up Quantea
-  Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
+ ## Setting Up Quantea
+ Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
   
   #### Dependencies
   
