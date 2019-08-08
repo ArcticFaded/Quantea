@@ -12,10 +12,10 @@
 
  * [Installing](#install)	
  * [Setting Up Quantea](#setting-up-quantea)
-  * [Dependencies](#dependencies)	  * [Dependencies](#dependencies)
-* [Writing and Running Tests](#writing-and-running-tests)	    * [Backtesting ML trader](#backtesting-ml-trader)
-* [Environment Variables](#environment-variables)	    * [IEX API key](#iex-api-key)
-  * [Configuring Packager IP Address](#configuring-packager-ip-address)	  * [User Roles](#user-roles)
+  * [Dependencies](#dependencies)
+* [Writing and Running Tests](#writing-and-running-tests)
+* [Environment Variables](#environment-variables)
+  * [Configuring Packager IP Address](#configuring-packager-ip-address)
   
   
   ## Install
