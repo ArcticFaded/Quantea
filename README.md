@@ -15,7 +15,7 @@
   * [Dependencies](#dependencies)
 * [Writing and Running Tests](#writing-and-running-tests)
 * [Environment Variables](#environment-variables)
-  * [Configuring Packager IP Address](#configuring-packager-ip-address)
+  * [Configuring IEX token](#configuring-iex-token)
   
   
  ## Install
