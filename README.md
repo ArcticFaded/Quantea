@@ -22,7 +22,7 @@
  From PyPI with pip (latest stable release):
 
  ```python
- $ pip3 install quantea
+ pip3 install quantea
  ```
 
  From development repository (dev version):
