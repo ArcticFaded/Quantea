@@ -11,34 +11,49 @@
 
 
  * [Installing](#install)	
- * [Setting Up Quanty](#setting-up-quanty)
+ * [Setting Up Quantea](#setting-up-quantea)
   * [Dependencies](#dependencies)	  * [Dependencies](#dependencies)
-  * [Installation](#installation)	    * [Installation](#installation)
 * [Writing and Running Tests](#writing-and-running-tests)	    * [Backtesting ML trader](#backtesting-ml-trader)
 * [Environment Variables](#environment-variables)	    * [IEX API key](#iex-api-key)
   * [Configuring Packager IP Address](#configuring-packager-ip-address)	  * [User Roles](#user-roles)
   
   
+  ## Install
+  pip install quantea
+  
+  ## Setting Up Quantea
+  Quantea relies on MongoDB to cache responses from IEX in order prevent rate limiting API request to IEX cloud while allowing for multiple re-testing sessions.
+  
+  #### Dependencies
+  
+  #### MongoDB
+  
  EXAMPLE USAGE:
 ```
-from marketsim.historic_back_trader import HistoricBackTrader
-from technical_indicators.standard_indicators import BollingerBand, EMA
-from sklearn.ensemble import RandomForestClassifier
+from quantea.marketsim.historic_back_trader import HistoricBackTrader
+from quantea.technical_indicators.standard_indicators import BollingerBand, EMA, MACD
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from datetime import datetime
-from actions.get_stock_data import get_historical_prices
-
+from quantea.actions.get_stock_data import get_historical_prices
+import numpy as np
 
 start = datetime(2014, 1, 1)
 end = datetime.now()
 
 tokens = ['AAPL', 'NVDA']
 
-x = get_historical_prices(start=start, end=end, stocks=tokens, token='enter_token_here')
+# example call with fake token (replace with your own)
+x = get_historical_prices(start=start, end=end, stocks=tokens, token='your_iex_token_here')
 
-clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
+clf = AdaBoostClassifier(n_estimators=2,) #max_depth=2)
 
-trader = HistoricBackTrader(clf, stocks_df=x.AAPL)
+trader = HistoricBackTrader(clf, stocks_df=x, train_stock='NVDA', verbose=True)
 
-trader.add_feature(BollingerBand(N_day=20))
-trader.add_feature(EMA(N_day=5))
+trader.add_feature(BollingerBand(N_day=26))
+trader.add_feature(MACD(N1=26, N2=12))
+
+trader.add_discritizer(lambda x: np.sum(x, axis=1))
+
+tt = trader.train()
+testt = trader.test()
 ```
