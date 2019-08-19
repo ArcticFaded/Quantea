@@ -41,6 +41,8 @@ class HistoricBackTrader:
         self.features = None
         self.discrete = None
         self.cuts = None
+        self.train_trades = None
+        self.test_trades = None
         
         
     def add_feature(self, TA, name=None):
@@ -84,9 +86,9 @@ class HistoricBackTrader:
         adjusted_start_time = start_date + datetime.timedelta(days=self.lookback_window)
         end_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split)]
         
-        market = self.stocks_df.loc[adjusted_start_time:end_date]
+        market = self.stocks_df.loc[adjusted_start_time:end_date].copy()
         market = market / market.iloc[0]
-        signals = self.features.loc[adjusted_start_time:end_date]
+        signals = self.features.loc[adjusted_start_time:end_date].copy()
 
         self.cuts = [pd.qcut(signals[x], 5, labels=list(range(5)), duplicates='drop', retbins=True)[1] for x in signals]
 
@@ -95,22 +97,30 @@ class HistoricBackTrader:
         for epoch in range(self.epochs):
             states = self.discrete(signals)
             
-            target = market.copy()[1:]
+            target = market.copy()
+            target = target.diff()[1:]
             target.index = market.index[:-1]
-            target.loc[market.index[-1]] = pd.Series({'close': 0, 'volume': 0})
-            target.sort_index(inplace=True)
+            target=target.append(
+                pd.Series({
+                    'close': 0,
+                    'volume': 0
+                }, name=market.index[-1]), ignore_index=False
+            )
             
             market_state = market.copy()
-            market_state.loc[:, 'close'] = market_state.loc[:, 'close'].diff()[1:]
             market_state.loc[:,'states'] = states
             market_state.loc[:,'target'] = np.zeros(len(market))
-            market_state.iloc[0, 0] = 0
-            market_state.loc[market.index[np.where(market_state.close + market_impact < target.close )[0]], 'target'] = 1
-            market_state.loc[market.index[np.where(market_state.close > target.close + market_impact)[0]], 'target'] = -1
-            actions = self.learner.fit(market_state[['close', 'volume', 'states']], market_state['target']) # combine close, volume, and signals
+            # market_state.iloc[0, 0] = 0
 
+            market_state.loc[market.index[np.where( target.close - market_impact > 0 )[0]], 'target'] = 1
+            market_state.loc[market.index[np.where( target.close + market_impact < 0)[0]], 'target'] = -1
+            actions = self.learner.fit(market_state[['close', 'volume', 'states']], market_state['target']) # combine close, volume, and signals
+            
             results = sim_market(actions, market_state, self.train_stock)
+            self.train_trades = results
+            
             optimum = compute_portvals(market, results, commission=commission, impact=market_impact)
+            print(optimum)
             optimum = optimum / optimum[0]
             optimum_dr = self.avg_daily_returns(optimum)[1:]
             
@@ -135,9 +145,9 @@ class HistoricBackTrader:
         start_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split) + 1]
         end_date = self.stocks_df.index[-1]
         
-        market = self.stocks_df.loc[start_date:end_date]
+        market = self.stocks_df.loc[start_date:end_date].copy()
         market = market / market.iloc[0]
-        signals = self.features.loc[start_date:end_date]
+        signals = self.features.loc[start_date:end_date].copy()
 
         for cut in range(len(self.cuts)):
             signals.iloc[:, cut] = pd.cut(signals.iloc[:, cut], bins=self.cuts[cut], include_lowest=True, labels=False)
@@ -145,11 +155,11 @@ class HistoricBackTrader:
         states = self.discrete(signals)
         market_state = market.copy()
         market_state.loc[:, 'states'] = states
-
         actions = self.learner.predict(market_state) # combine close, volume, and signals
-        
         results = sim_market_results(actions, market_state, self.train_stock)
+        self.test_trades = results
         optimum = compute_portvals(market, results, commission=commission, impact=market_impact)
+        print(optimum)
         optimum = optimum / optimum[0]
         optimum_dr = self.avg_daily_returns(optimum)[1:]
 
