@@ -10,26 +10,33 @@
  ## Table of Contents
 
 
- * [Installing](#install)	
- * [Setting Up Quantea](#setting-up-quantea)
+* [Installing](#install)	
+* [Setting Up Quantea](#setting-up-quantea)
   * [Dependencies](#dependencies)
+* [Implementating Your Own Features](#implementating-your-own-features)
+  * [What Are Features In Trading?](#what-are-features-in-trading)
+  * [Feature Interface](#feature-interface)
+* [Implementating Your Own Discretization](#implementating-your-own-discretization)
+  * [How to Represent State to an ML Trader](#how-to-represent-state-to-an-ml-trader)
+  * [Discretization Options](#discretization-options)
 * [Writing and Running Tests](#writing-and-running-tests)
 * [Environment Variables](#environment-variables)
-  * [Configuring Packager IP Address](#configuring-packager-ip-address)
+  * [Configuring IEX token](#configuring-iex-token)
   
   
  ## Install
  From PyPI with pip (latest stable release):
 
- ```python
- pip3 install quantea
+ ```bash
+ pip3 install quantea (NOT CURRENTLY AVAILABLE)
+ pip3 install --index-url https://test.pypi.org/simple --no-dep quantea --upgrade (ONLY TEST AVAILABLE)
  ```
 
  From development repository (dev version):
 
  ```bash
  git clone https://github.com/ArcticFaded/Quantea.git
- cd src
+ cd quantea
  python3 setup.py install
  ```
  ## Setting Up Quantea
