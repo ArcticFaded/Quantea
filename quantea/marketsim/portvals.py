@@ -18,7 +18,6 @@ def compute_portvals(market, orders, commission=0.00, impact=0.000, start_val=10
     orders.sort_index(inplace=True)
     orders = orders.loc[orders.index.isin(market.index)]
     symbols = orders.columns
-    
     trades = pd.DataFrame(index=market.index, 
                           data=np.zeros((len(market), len(symbols) + 1)), 
                           columns=symbols.tolist() + ['CASH'])

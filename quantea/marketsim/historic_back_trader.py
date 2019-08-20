@@ -119,7 +119,7 @@ class HistoricBackTrader:
             results = sim_market(actions, market_state, self.train_stock)
             self.train_trades = results
             
-            optimum = compute_portvals(market, results, commission=commission, impact=market_impact)
+            optimum = compute_portvals(market.close, results, commission=commission, impact=market_impact)
             print(optimum)
             optimum = optimum / optimum[0]
             optimum_dr = self.avg_daily_returns(optimum)[1:]
