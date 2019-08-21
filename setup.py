@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="quantea",
-    version="0.0.5",
+    version="0.1.1",
     author="Jonathan Beltran",
     author_email="jbeltran7@gatech.edu",
     description="A backtrading framework",

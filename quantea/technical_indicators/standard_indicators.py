@@ -33,6 +33,13 @@ class BollingerBand(BaseTechnicalIndicator):
         )
         self.lookback_window = N_day
 
+    def to_column(self, close):
+        upper = bollinger_hband(close, n=self.lookback_window)
+        lower = bollinger_lband(close, n=self.lookback_window)
+        bband = self.indicator(close)
+
+        return (close - bband) / (upper - lower)
+
 class MACD(BaseTechnicalIndicator):
     """
     Moving Average Convergence Divergence (MACD)
@@ -42,9 +49,14 @@ class MACD(BaseTechnicalIndicator):
 
     def __init__(self, N1, N2):
         super().__init__(
-            indicator=lambda x: macd(x, N1, N2)
+            indicator=lambda x: macd(x, n_fast=N1, n_slow=N2)
         )
         self.lookback_window = max(N1, N2)
+
+    def to_column(self, close):
+        _macd = self.indicator(close)
+
+        return _macd / close
 
 class EMA(BaseTechnicalIndicator):
     """

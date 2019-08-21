@@ -15,6 +15,7 @@ def compute_portvals(market, orders, commission=0.00, impact=0.000, start_val=10
     where ticker is the stock ticker, and order is the amount to buy (+ number), sell (- number), short (if net orders is negative), and hold (if order is 0)
     holding does not need to be specified however.
     """
+    market = pd.DataFrame(market)
     orders.sort_index(inplace=True)
     orders = orders.loc[orders.index.isin(market.index)]
     symbols = orders.columns
@@ -42,7 +43,7 @@ def compute_portvals(market, orders, commission=0.00, impact=0.000, start_val=10
     holdings = trades.cumsum()
     holdings.loc[:, 'CASH'] += start_val
     if len(symbols) == 1:
-        market = market.drop(columns=['volume'])
+        market = market.drop(columns=['volume']) if 'volume' in market.columns else market
         market = market.rename(columns={'close': symbols[0]})
 
 

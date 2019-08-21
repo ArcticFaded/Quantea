@@ -52,14 +52,14 @@ class HistoricBackTrader:
         if (self.discrete is not None):
             raise ValueError("Cannot add more features once discretizer has been added")
         if (self.features is None):
-            self.features = pd.DataFrame(index=self.stocks_df.index)
+            self.features = {}
         if (TA.lookback_window > self.lookback_window):
             self.lookback_window = TA.lookback_window
-        if (not isinstance(TA, BaseTechnicalIndicator)):
-            raise ValueError("TA must inherit BaseTechnicalIndicator")
+        # if (not isinstance(TA, BaseTechnicalIndicator)):
+        #     raise ValueError("TA must inherit BaseTechnicalIndicator")
             
-        feature_name = name if name != None else 'X' + str(len(self.features.columns))
-        self.features[feature_name] = TA.to_column(self.stocks_df.close)
+        feature_name = name if name != None else 'X' + str(len(self.features))
+        self.features[feature_name] = TA
         return self
     
     def add_discritizer(self, discrete):
@@ -78,24 +78,30 @@ class HistoricBackTrader:
         """
         if (self.features is None):
             raise ValueError("Trader must have features")
-            
-        if (self.discrete is None):
-            raise ValueError("Trader must implement state representation")
         
         start_date = self.stocks_df.index[0]
-        adjusted_start_time = start_date + datetime.timedelta(days=self.lookback_window)
+        adjusted_start_time = start_date + datetime.timedelta(days=self.lookback_window + 10)
         end_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split)]
         
         market = self.stocks_df.loc[adjusted_start_time:end_date].copy()
         market = market / market.iloc[0]
-        signals = self.features.loc[adjusted_start_time:end_date].copy()
+        
+        feats = [self.features[feature].to_column(self.stocks_df.loc[start_date:end_date].copy().close) for feature in self.features]
 
+        signals = pd.concat(feats, axis=1, keys=[s for s in self.features])
+        signals = signals.loc[adjusted_start_time:end_date]
+        
         self.cuts = [pd.qcut(signals[x], 5, labels=list(range(5)), duplicates='drop', retbins=True)[1] for x in signals]
 
         signals = signals.apply(lambda x: pd.qcut(x, 5, labels=list(range(5)), duplicates='drop'), axis=0)
 
         for epoch in range(self.epochs):
-            states = self.discrete(signals)
+            market_state = market.copy()
+            if self.discrete is not None:
+                states = self.discrete(signals)
+                market_state.loc[:,'states'] = states
+            else:
+                market_state = market_state.join(signals)
             
             target = market.copy()
             target = target.diff()[1:]
@@ -107,20 +113,16 @@ class HistoricBackTrader:
                 }, name=market.index[-1]), ignore_index=False
             )
             
-            market_state = market.copy()
-            market_state.loc[:,'states'] = states
             market_state.loc[:,'target'] = np.zeros(len(market))
-            # market_state.iloc[0, 0] = 0
 
             market_state.loc[market.index[np.where( target.close - market_impact > 0 )[0]], 'target'] = 1
             market_state.loc[market.index[np.where( target.close + market_impact < 0)[0]], 'target'] = -1
-            actions = self.learner.fit(market_state[['close', 'volume', 'states']], market_state['target']) # combine close, volume, and signals
+            actions = self.learner.fit(market_state[market_state.columns[:-1]], market_state['target']) # combine close, volume, and signals
             
             results = sim_market(actions, market_state, self.train_stock)
             self.train_trades = results
             
             optimum = compute_portvals(market.close, results, commission=commission, impact=market_impact)
-            print(optimum)
             optimum = optimum / optimum[0]
             optimum_dr = self.avg_daily_returns(optimum)[1:]
             
@@ -143,23 +145,30 @@ class HistoricBackTrader:
             raise ValueError("Must run train before test")
 
         start_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split) + 1]
+        adjusted_start_time = start_date - datetime.timedelta(days=28)
         end_date = self.stocks_df.index[-1]
         
         market = self.stocks_df.loc[start_date:end_date].copy()
         market = market / market.iloc[0]
-        signals = self.features.loc[start_date:end_date].copy()
 
+        feats = [self.features[feature].to_column(self.stocks_df.loc[adjusted_start_time:end_date].copy().close) for feature in self.features]
+        signals = pd.concat(feats, axis=1, keys=[s for s in self.features])
+        signals = signals.loc[start_date:end_date]
+        
         for cut in range(len(self.cuts)):
             signals.iloc[:, cut] = pd.cut(signals.iloc[:, cut], bins=self.cuts[cut], include_lowest=True, labels=False)
-        
-        states = self.discrete(signals)
+            signals.iloc[  np.where(np.isnan(signals))[0]  , cut] = len(self.cuts[cut])-1# np.random.randint(len(self.cuts[cut])-2)
         market_state = market.copy()
-        market_state.loc[:, 'states'] = states
+        if self.discrete is not None:
+            states = self.discrete(signals)
+            market_state.loc[:,'states'] = states
+        else:
+            market_state = market_state.join(signals)
+        
         actions = self.learner.predict(market_state) # combine close, volume, and signals
         results = sim_market_results(actions, market_state, self.train_stock)
         self.test_trades = results
         optimum = compute_portvals(market, results, commission=commission, impact=market_impact)
-        print(optimum)
         optimum = optimum / optimum[0]
         optimum_dr = self.avg_daily_returns(optimum)[1:]
 

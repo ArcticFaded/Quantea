@@ -142,9 +142,9 @@ class ManualBackTrader:
         start_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split) + 1]
         end_date = self.stocks_df.index[-1]
 
-        market = self.stocks_df.loc[adjusted_start_time:end_date].copy()
+        market = self.stocks_df.loc[start_date:end_date].copy()
         market = market / market.iloc[0]
-        signals = self.features.loc[adjusted_start_time:end_date].copy()
+        signals = self.features.loc[start_date:end_date].copy()
         signals = signals/signals.iloc[0]
         market = market.join(signals)
 
@@ -162,11 +162,39 @@ class ManualBackTrader:
 
         return df_trades
     
-    def get_baseline(self, commission=0.00, market_impact=0.000):
+    def get_train_baseline(self, commission=0.00, market_impact=0.000):
         baseline_trades = pd.DataFrame(columns = ['date', self.train_stock])
         initial_spread = 1000
 
         start_date = self.stocks_df.index[0]
+        adjusted_start_time = start_date + datetime.timedelta(days=self.lookback_window)
+        end_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split)]
+
+        market = self.stocks_df.loc[start_date:end_date]
+
+        baseline_trades = baseline_trades.append(
+            self.row_helper(market.index[0], self.train_stock, initial_spread), ignore_index=True
+        )
+
+        baseline_trades = baseline_trades.set_index('date').astype('int32')
+
+        optimum = compute_portvals(market, baseline_trades, commission=commission, impact=market_impact)
+        optimum = optimum / optimum[0]
+        optimum_dr = self.avg_daily_returns(optimum)[1:]
+        
+        if self.verbose:
+            print ("Baseline Stats: -----")
+            print ('Cumulative Return:', self.cal_portfolio_value(optimum))
+            print ('StdDev on Daily Returns:', optimum_dr.std())
+            print ('Mean on Daily Returns:', optimum_dr.mean())
+
+        return baseline_trades
+
+    def get_test_baseline(self, commission=0.00, market_impact=0.000):
+        baseline_trades = pd.DataFrame(columns = ['date', self.train_stock])
+        initial_spread = 1000
+
+        start_date = self.stocks_df.index[int(len(self.stocks_df) * self.test_train_split) + 1]
         end_date = self.stocks_df.index[-1]
 
         market = self.stocks_df.loc[start_date:end_date]
